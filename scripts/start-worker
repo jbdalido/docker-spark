@@ -2,6 +2,6 @@
 cd /usr/local/spark
 ./bin/spark-class org.apache.spark.deploy.worker.Worker \
 	spark://${SPARK_MASTER_IP}:${SPARK_MASTER_PORT} \
-	--properties-file /spark-defaults.conf \
+	--properties-file /spark/spark-defaults.conf \
 	-i $SPARK_LOCAL_IP \
 	"$@"
