@@ -1,24 +1,16 @@
-FROM ubuntu:14.04
+FROM oracle-java7
 
-MAINTAINER Pakhomov Egor <pahomov.egor@gmail.com>
+ENV DEBIAN_FRONTEND noninteractive 
 
-RUN apt-get -y update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --force-yes software-properties-common python-software-properties
-RUN apt-add-repository -y ppa:webupd8team/java
-RUN apt-get -y update
-RUN /bin/echo debconf shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
-RUN DEBIAN_FRONTEND=noninteractive apt-get -y install oracle-java7-installer oracle-java7-set-default
+RUN apt-get update -y \
+    && apt-get install curl \
+    && curl -s http://www.apache.org/dyn/closer.lua/spark/spark-1.5.1/spark-1.5.1-bin-hadoop2.6.tgz | tar -xz -C /usr/local/ \
+    && ln -s /usr/local/spark-1.5.1-bin-hadoop2.6 /usr/local/spark
 
-RUN apt-get -y install curl
-RUN curl -s http://www.apache.org/dyn/closer.lua/spark/spark-1.5.1/spark-1.5.1-bin-hadoop2.6.tgz | tar -xz -C /usr/local/
-RUN cd /usr/local && ln -s spark-1.5.1-bin-hadoop2.6 spark
-ADD scripts/start-master.sh /start-master.sh
-ADD scripts/start-worker /start-worker.sh
-ADD scripts/spark-shell.sh  /spark-shell.sh
-ADD scripts/spark-defaults.conf /spark-defaults.conf
-ADD scripts/remove_alias.sh /remove_alias.sh
+COPY scripts/ /spark
+
+ENV PATH $PATH:/spark
 ENV SPARK_HOME /usr/local/spark
-
 ENV SPARK_MASTER_OPTS="-Dspark.driver.port=7001 -Dspark.fileserver.port=7002 -Dspark.broadcast.port=7003 -Dspark.replClassServer.port=7004 -Dspark.blockManager.port=7005 -Dspark.executor.port=7006 -Dspark.ui.port=4040 -Dspark.broadcast.factory=org.apache.spark.broadcast.HttpBroadcastFactory"
 ENV SPARK_WORKER_OPTS="-Dspark.driver.port=7001 -Dspark.fileserver.port=7002 -Dspark.broadcast.port=7003 -Dspark.replClassServer.port=7004 -Dspark.blockManager.port=7005 -Dspark.executor.port=7006 -Dspark.ui.port=4040 -Dspark.broadcast.factory=org.apache.spark.broadcast.HttpBroadcastFactory"
 
